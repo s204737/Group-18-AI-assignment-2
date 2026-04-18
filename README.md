@@ -34,7 +34,14 @@ python main.py --doctor
 # or
 python doctor.py
 ```
-A guided step-by-step interface where you answer questions about a patient's symptoms and test results. The belief base is revised after each answer and a final diagnosis is produced.
+A guided step-by-step diagnostic tool where you play the role of a doctor. Answer questions about a patient's symptoms and test results — the belief base is revised after each answer and a final diagnosis is produced.
+
+The interface has three stages:
+- **Step 1 — Symptoms** (priority 7): observed findings such as fever, cough, fatigue, sore throat
+- **Step 2 — Lab results** (priority 9): flu and COVID test outcomes, highest trust
+- **Step 3 — Clinical judgement** (priority 6): overall assessment
+
+Each question includes a plain-English hint explaining what it means. Answer `yes`, `no`, or `unknown` (press Enter to skip).
 
 ## File Structure
 
@@ -73,12 +80,12 @@ B * φ  =  (B ÷ ¬φ) + φ
 First contract by ¬φ to remove conflicting beliefs, then expand with φ.
 
 ### AGM Postulates
-All 5 mandatory postulates are verified:
+All 5 mandatory postulates are verified, each using a distinct medical scenario:
 
-| Postulate | What it checks |
-|---|---|
-| Success | φ is in B * φ |
-| Inclusion | B * φ ⊆ B + φ |
-| Vacuity | If ¬φ ∉ B then B * φ = B + φ |
-| Consistency | B * φ is satisfiable (unless φ is a contradiction) |
-| Extensionality | If φ ↔ ψ is a tautology then B * φ = B * ψ |
+| Postulate | Scenario | What it checks |
+|---|---|---|
+| Success | Flu test negative | φ is in B * φ |
+| Inclusion | COVID patient confirmed healthy | B * φ ⊆ B + φ |
+| Vacuity | No prior opinion on covid | If ¬φ ∉ B then B * φ = B + φ |
+| Consistency | Cold diagnosis, sore throat absent | B * φ is satisfiable |
+| Extensionality | Two logically equivalent formulas | If φ ↔ ψ is a tautology then B * φ = B * ψ |

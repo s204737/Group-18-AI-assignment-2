@@ -95,65 +95,95 @@ def run_doctor_mode() -> None:
     print("\n" + "=" * 56)
     print("  Medical Belief Revision — Doctor Interface")
     print("=" * 56)
-    print("  Answer questions about the patient.")
-    print("  Type 'unknown' (or press Enter) to skip a question.\n")
+    print("""
+  How this works:
+    You are the doctor. Answer each question about your patient.
+    The engine updates its beliefs after every answer and narrows
+    down the diagnosis automatically.
+
+    For each question, type:
+      yes     — you observed this / the test was positive
+      no      — you confirmed this is absent / test was negative
+      unknown — you don't know yet, skip this question
+
+  The engine uses three levels of evidence:
+    Step 1 — Symptoms         (priority 7, strong but not conclusive)
+    Step 2 — Lab test results (priority 9, highest trust)
+    Step 3 — Clinical judgement (priority 6, supporting opinion)
+""")
 
     base = BeliefBase(BACKGROUND)
 
     # --- Symptom observations ---
     _separator()
-    print("  STEP 1: Observed symptoms\n")
+    print("  STEP 1: Observed symptoms")
+    print("  Look at the patient and answer what you can observe directly.\n")
 
     symptom_questions = [
-        (fever,       "Does the patient have a fever?"),
-        (cough,       "Does the patient have a cough?"),
-        (fatigue,     "Does the patient report fatigue?"),
-        (sore_throat, "Does the patient have a sore throat?"),
+        (fever,       "Fever",       "Does the patient have a fever?",
+                      "A temperature above 38°C counts as a fever."),
+        (cough,       "Cough",       "Does the patient have a cough?",
+                      "Any persistent cough, dry or wet."),
+        (fatigue,     "Fatigue",     "Does the patient report fatigue?",
+                      "Unusual tiredness or low energy reported by the patient."),
+        (sore_throat, "Sore throat", "Does the patient have a sore throat?",
+                      "Pain or irritation in the throat, especially when swallowing."),
     ]
 
-    for atom, question in symptom_questions:
+    for atom, name, question, hint in symptom_questions:
+        print(f"  [{name}]  {hint}")
         ans = _ask(question)
         if ans is True:
             base = revise(base, atom,      priority=7)
         elif ans is False:
             base = revise(base, Not(atom), priority=7)
-        # None = skip
+        print()
 
     _print_diagnosis(base)
 
     # --- Lab / test results ---
     _separator()
-    print("  STEP 2: Test results (if available)\n")
+    print("  STEP 2: Lab test results")
+    print("  Enter any test results you have. These carry the highest weight.\n")
 
     test_questions = [
-        (flu,     "Flu test result:    positive?"),
-        (covid,   "COVID test result:  positive?"),
+        (flu,   "Flu test",   "Flu test result — was it positive?",
+                "A positive rapid flu test confirms influenza."),
+        (covid, "COVID test", "COVID test result — was it positive?",
+                "A positive lateral flow or PCR test confirms COVID-19."),
     ]
 
-    for atom, question in test_questions:
+    for atom, name, question, hint in test_questions:
+        print(f"  [{name}]  {hint}")
         ans = _ask(question)
         if ans is True:
             base = revise(base, atom,      priority=9)
         elif ans is False:
             base = revise(base, Not(atom), priority=9)
+        print()
 
     _print_diagnosis(base)
 
     # --- Doctor's clinical judgement ---
     _separator()
-    print("  STEP 3: Clinical judgement (optional)\n")
+    print("  STEP 3: Clinical judgement")
+    print("  Your overall professional assessment of the patient.\n")
 
     clinical_questions = [
-        (healthy, "Does the patient appear healthy overall?"),
-        (cold,    "Does the presentation suggest a common cold?"),
+        (healthy, "Overall health", "Does the patient appear healthy overall?",
+                  "No signs of illness — patient seems well despite any mild symptoms."),
+        (cold,    "Common cold",    "Does the presentation suggest a common cold?",
+                  "Mild symptoms, no fever, consistent with a rhinovirus infection."),
     ]
 
-    for atom, question in clinical_questions:
+    for atom, name, question, hint in clinical_questions:
+        print(f"  [{name}]  {hint}")
         ans = _ask(question)
         if ans is True:
             base = revise(base, atom,      priority=6)
         elif ans is False:
             base = revise(base, Not(atom), priority=6)
+        print()
 
     # --- Final diagnosis ---
     _separator()
