@@ -3,12 +3,11 @@ agm_tests.py
 ------------
 Tests for the five AGM revision postulates.
 
-Postulates tested:
-  1. Success       phi ∈ B * phi
-  2. Inclusion     B * phi ⊆ B + phi
-  3. Vacuity       ¬phi ∉ B  =>  B * phi = B + phi
-  4. Consistency   B * phi is consistent  (unless phi is a contradiction)
-  5. Extensionality  phi ↔ psi tautology  =>  B * phi = B * psi
+  1. Success          phi ∈ B * phi
+  2. Inclusion        B * phi ⊆ B + phi
+  3. Vacuity          ¬phi ∉ B  =>  B * phi = B + phi
+  4. Consistency      B * phi is consistent  (unless phi is a contradiction)
+  5. Extensionality   phi ↔ psi tautology  =>  B * phi = B * psi
 """
 
 from __future__ import annotations
@@ -44,7 +43,7 @@ def _print_base(base: BeliefBase, label: str) -> None:
 
 def _print_result(postulate: str, passed: bool) -> None:
     status = "PASS" if passed else "FAIL"
-    print(f"\n  >>> [{status}] {postulate} postulate\n")
+    print(f"\n  [{status}] {postulate}\n")
 
 
 # ---------------------------------------------------------------------------
@@ -53,29 +52,25 @@ def _print_result(postulate: str, passed: bool) -> None:
 
 def test_success() -> bool:
     print("\n" + "─" * 50)
-    print("  POSTULATE 1: Success")
-    print("  Claim: after revising with φ, φ must be in the result.")
-    print("  Why:   revision is pointless if the new belief doesn't stick.")
-    print("  Scene: doctor believed the patient has flu — flu test comes back negative.")
+    print("  Success  —  phi must be in B * phi")
+    print("  Storm forecast revised with ¬storm (no wind observed)")
 
-    flu   = Atom('flu')
-    fever = Atom('fever')
+    storm = Atom('storm')
+    wind  = Atom('wind')
 
     base = BeliefBase([
-        (Implies(flu, fever), 8),
-        (flu,                 5),
-        (fever,               4),
+        (Implies(storm, wind), 8),
+        (storm,                5),
+        (wind,                 4),
     ])
-    phi = Not(flu)
+    phi = Not(storm)
 
-    print(f"\n  Revising with: {phi}")
-    _print_base(base, "Belief base before revision")
-
+    _print_base(base, "Before")
     result = revise(base, phi, priority=7)
-    _print_base(result, "Belief base after revision")
+    _print_base(result, "After revising with ¬storm")
 
     passed = phi in result
-    print(f"\n  Check: is {phi} in the revised base? {passed}")
+    print(f"\n  ¬storm in revised base: {passed}")
     _print_result("Success", passed)
     return passed
 
@@ -86,39 +81,32 @@ def test_success() -> bool:
 
 def test_inclusion() -> bool:
     print("\n" + "─" * 50)
-    print("  POSTULATE 2: Inclusion")
-    print("  Claim: B * φ ⊆ B + φ")
-    print("  Why:   revision only removes beliefs (to fix conflicts).")
-    print("         it should never introduce beliefs that weren't in")
-    print("         the base or the new formula itself.")
-    print("  Scene: patient was believed to have covid — doctor now confirms they are healthy.")
+    print("  Inclusion  —  B * phi ⊆ B + phi")
+    print("  Storm expected — satellite confirms clear skies")
 
-    covid   = Atom('covid')
-    fatigue = Atom('fatigue')
-    healthy = Atom('healthy')
+    storm = Atom('storm')
+    rain  = Atom('rain')
+    clear = Atom('clear')
 
     base = BeliefBase([
-        (Implies(covid, fatigue), 8),
-        (covid,                   6),
-        (fatigue,                 5),
+        (Implies(storm, rain), 8),
+        (storm,                6),
+        (rain,                 5),
     ])
-    phi = healthy
-
-    print(f"\n  Revising with: {phi}")
-    _print_base(base, "Belief base before revision")
+    phi = clear
 
     revised  = revise(base, phi, priority=7)
     expanded = expand(base, phi, priority=7)
 
-    _print_base(revised,  "B * φ  (revised — conflicts removed first)")
-    _print_base(expanded, "B + φ  (expanded — blind add, no conflict removal)")
+    _print_base(revised,  "B * phi  (revised)")
+    _print_base(expanded, "B + phi  (expanded)")
 
     revised_set  = revised.to_set()
     expanded_set = expanded.to_set()
-    extra = revised_set - expanded_set
-
+    extra  = revised_set - expanded_set
     passed = revised_set.issubset(expanded_set)
-    print(f"\n  Check: every belief in (B * φ) also appears in (B + φ)? {passed}")
+
+    print(f"\n  B * phi ⊆ B + phi: {passed}")
     if extra:
         print(f"  Unexpected extra beliefs: {extra}")
     _print_result("Inclusion", passed)
@@ -131,35 +119,31 @@ def test_inclusion() -> bool:
 
 def test_vacuity() -> bool:
     print("\n" + "─" * 50)
-    print("  POSTULATE 3: Vacuity")
-    print("  Claim: if B does not believe ¬φ, then B * φ = B + φ")
-    print("  Why:   if there is no conflict, revision and expansion")
-    print("         should be identical — no cleanup is needed.")
+    print("  Vacuity  —  if ¬phi ∉ B then B * phi = B + phi")
+    print("  Base {rain, wind} has no opinion on frost — revision equals expansion")
 
-    fever = Atom('fever')
-    cough = Atom('cough')
-    covid = Atom('covid')
+    rain  = Atom('rain')
+    wind  = Atom('wind')
+    frost = Atom('frost')
 
     base = BeliefBase([
-        (fever, 6),
-        (cough, 5),
+        (rain, 6),
+        (wind, 5),
     ])
-    phi = covid
+    phi = frost
 
     precondition = not entails(base.formulas(), Not(phi))
-    print(f"\n  Revising with: {phi}  (adding a covid belief to a base that has no opinion on covid)")
-    print(f"  Pre-condition — base does NOT already believe ¬covid: {precondition}")
-    _print_base(base, "Belief base before revision")
+    _print_base(base, "Before")
 
     revised  = revise(base, phi, priority=5)
     expanded = expand(base, phi, priority=5)
 
-    _print_base(revised,  "B * φ  (revised)")
-    _print_base(expanded, "B + φ  (expanded)")
+    _print_base(revised,  "B * phi")
+    _print_base(expanded, "B + phi")
 
-    equal = _formulas_equal_as_sets(revised, expanded)
+    equal  = _formulas_equal_as_sets(revised, expanded)
     passed = precondition and equal
-    print(f"\n  Check: B * φ == B + φ? {equal}")
+    print(f"\n  ¬frost not in base: {precondition}  |  B * phi == B + phi: {equal}")
     _print_result("Vacuity", passed)
     return passed
 
@@ -170,35 +154,27 @@ def test_vacuity() -> bool:
 
 def test_consistency() -> bool:
     print("\n" + "─" * 50)
-    print("  POSTULATE 4: Consistency")
-    print("  Claim: B * φ is consistent (unless φ itself is a contradiction).")
-    print("  Why:   a belief base with a contradiction is useless —")
-    print("         it entails everything, including false statements.")
-    print("  Scene: patient was thought to have a cold — sore throat turns out to be absent.")
+    print("  Consistency  —  B * phi must be satisfiable")
+    print("  Frost forecast (requires cold ∧ ¬rain) revised with rain")
 
-    cold        = Atom('cold')
-    cough       = Atom('cough')
-    sore_throat = Atom('sore_throat')
+    frost = Atom('frost')
+    cold  = Atom('cold')
+    rain  = Atom('rain')
 
     base = BeliefBase([
-        (Implies(cold, And(cough, sore_throat)), 9),
-        (cold,                                   5),
-        (sore_throat,                            4),
-        (cough,                                  4),
+        (Implies(frost, And(cold, Not(rain))), 9),
+        (frost,                                5),
+        (cold,                                 4),
     ])
-    phi = Not(sore_throat)
+    phi = rain
 
-    phi_is_contradiction = phi.is_contradiction()
-    print(f"\n  Revising with: {phi}  (no sore throat after all)")
-    print(f"  Note: {phi} is itself a contradiction? {phi_is_contradiction}")
-    _print_base(base, "Belief base before revision")
-
+    _print_base(base, "Before")
     result = revise(base, phi, priority=6)
-    _print_base(result, "Belief base after revision")
+    _print_base(result, "After revising with rain")
 
     consistent = is_consistent(result.formulas())
-    passed = phi_is_contradiction or consistent
-    print(f"\n  Check: is the revised base consistent? {consistent}")
+    passed = phi.is_contradiction() or consistent
+    print(f"\n  Revised base is consistent: {consistent}")
     _print_result("Consistency", passed)
     return passed
 
@@ -209,39 +185,31 @@ def test_consistency() -> bool:
 
 def test_extensionality() -> bool:
     print("\n" + "─" * 50)
-    print("  POSTULATE 5: Extensionality")
-    print("  Claim: if φ ↔ ψ is a tautology, then B * φ = B * ψ.")
-    print("  Why:   logically equivalent formulas carry the same information.")
-    print("         the engine must not treat them differently.")
+    print("  Extensionality  —  if phi ↔ psi is a tautology then B * phi = B * psi")
+    print("  (¬storm ∨ ¬rain)  and  (¬rain ∨ ¬storm)  are logically equivalent")
 
-    flu   = Atom('flu')
-    fever = Atom('fever')
+    storm = Atom('storm')
+    rain  = Atom('rain')
 
     base = BeliefBase([
-        (flu,   5),
-        (fever, 4),
+        (storm, 5),
+        (rain,  4),
     ])
 
-    phi = Or(Not(flu), Not(fever))
-    psi = Or(Not(fever), Not(flu))
+    phi = Or(Not(storm), Not(rain))
+    psi = Or(Not(rain),  Not(storm))
 
-    equivalence  = Iff(phi, psi)
-    is_tautology = equivalence.is_tautology()
-
-    print(f"\n  φ = {phi}")
-    print(f"  ψ = {psi}")
-    print(f"  φ ↔ ψ is a tautology (they mean the same thing): {is_tautology}")
-    _print_base(base, "Belief base (same for both revisions)")
+    is_tautology = Iff(phi, psi).is_tautology()
 
     result_phi = revise(base, phi, priority=6)
     result_psi = revise(base, psi, priority=6)
 
-    _print_base(result_phi, "B * φ")
-    _print_base(result_psi, "B * ψ")
+    _print_base(result_phi, "B * phi")
+    _print_base(result_psi, "B * psi")
 
     same   = _formulas_equal_as_sets(result_phi, result_psi)
     passed = is_tautology and same
-    print(f"\n  Check: B * φ == B * ψ? {same}")
+    print(f"\n  phi ↔ psi tautology: {is_tautology}  |  B * phi == B * psi: {same}")
     _print_result("Extensionality", passed)
     return passed
 
@@ -253,7 +221,6 @@ def test_extensionality() -> bool:
 def run_all_tests() -> None:
     print("\n" + "=" * 50)
     print("  AGM Postulate Tests")
-    print("  These verify the revision engine behaves rationally.")
     print("=" * 50)
 
     results = [
@@ -267,7 +234,7 @@ def run_all_tests() -> None:
     passed = sum(results)
     total  = len(results)
     print("=" * 50)
-    print(f"  {passed}/{total} postulates passed")
+    print(f"  {passed}/{total} passed")
     print("=" * 50 + "\n")
 
 
