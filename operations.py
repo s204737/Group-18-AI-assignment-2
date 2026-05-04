@@ -1,7 +1,5 @@
 """
-operations.py
--------------
-Contraction and expansion of a belief base.
+Implementation of AGM operations:Contraction and expansion of a belief base.
 
 Expansion  B + phi:
   Simply add phi to the belief base at the given priority.
@@ -23,9 +21,8 @@ from belief_base import BeliefBase
 from entailment import entails
 
 
-# ---------------------------------------------------------------------------
-# Expansion
-# ---------------------------------------------------------------------------
+
+# ---------------Expansion------------------------
 
 def expand(base: BeliefBase, phi: Formula, priority: int = 5) -> BeliefBase:
     """
@@ -37,17 +34,16 @@ def expand(base: BeliefBase, phi: Formula, priority: int = 5) -> BeliefBase:
     return result
 
 
-# ---------------------------------------------------------------------------
-# Contraction
-# ---------------------------------------------------------------------------
+
+# -----------------Contraction------------------------
 
 def contract(base: BeliefBase, phi: Formula) -> BeliefBase:
-    """
-    B ÷ phi: remove phi from the belief base using partial meet contraction.
+    
+    #B ÷ phi: remove phi from the belief base using partial meet contraction.
 
-    If the base does not entail phi, returns the base unchanged (vacuous contraction).
-    Returns a new BeliefBase (does not mutate the original).
-    """
+    #If the base does not entail phi, returns the base unchanged (vacuous contraction)
+    #Returns a new BeliefBase (does not mutate the original)
+
     formulas = base.formulas()
 
     # Vacuity: if phi is not entailed, nothing to do
@@ -82,9 +78,7 @@ def contract(base: BeliefBase, phi: Formula) -> BeliefBase:
     return result
 
 
-# ---------------------------------------------------------------------------
-# Remainder sets
-# ---------------------------------------------------------------------------
+# ---------------------Remainder sets-----------------------
 
 def _remainder_sets(formulas: list[Formula], phi: Formula) -> list[list[Formula]]:
     """
@@ -111,7 +105,7 @@ def _remainder_sets(formulas: list[Formula], phi: Formula) -> list[list[Formula]
 
 
 def _is_subset_of_any(candidate: list[Formula], remainders: list[list[Formula]]) -> bool:
-    """Return True if candidate is a strict subset of any remainder already found."""
+    #Return True if candidate is a strict subset of any remainder already found.
     candidate_set = set(candidate)
     for r in remainders:
         if candidate_set < set(r):   # strict subset
@@ -119,9 +113,7 @@ def _is_subset_of_any(candidate: list[Formula], remainders: list[list[Formula]])
     return False
 
 
-# ---------------------------------------------------------------------------
-# Selection function
-# ---------------------------------------------------------------------------
+# ----------------Selection function--------------------------
 
 def _selection_function(
     remainders: list[list[Formula]],
@@ -145,9 +137,7 @@ def _selection_function(
     return [r for r in remainders if score(r) == best_score]
 
 
-# ---------------------------------------------------------------------------
-# Quick demo
-# ---------------------------------------------------------------------------
+# ------------Test Demo----------------------
 
 if __name__ == "__main__":
     from formula import Atom, Implies, Not

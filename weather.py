@@ -1,7 +1,5 @@
 """
-weather.py
-----------
-Weather forecasting using the belief revision engine.
+Practicel Test: Weather forecasting using the belief revision engine.
 
 The user enters current observations and instrument readings.
 The belief base is revised after each input and a forecast is produced.
@@ -12,9 +10,8 @@ from belief_base import BeliefBase
 from revision import revise
 from entailment import entails
 
-# ---------------------------------------------------------------------------
-# Atoms
-# ---------------------------------------------------------------------------
+
+# ----------------Atoms--------------------------
 
 rain         = Atom('rain')
 wind         = Atom('wind')
@@ -32,9 +29,8 @@ FORECASTS = {
     frost: "Frost",
 }
 
-# ---------------------------------------------------------------------------
-# Background knowledge
-# ---------------------------------------------------------------------------
+
+# ----------------Background knowledge / Initial Beliefs----------------------
 
 BACKGROUND = [
     # Storm conditions
@@ -60,9 +56,7 @@ BACKGROUND = [
     (Implies(pressure_drop, storm),      8),
 ]
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+# --------------Helper Functions----------------------
 
 def _ask(question: str) -> bool | None:
     while True:
@@ -83,9 +77,7 @@ def _print_forecast(base: BeliefBase) -> None:
     print()
 
 
-# ---------------------------------------------------------------------------
-# Main flow
-# ---------------------------------------------------------------------------
+# -----------------Main function---------------------
 
 def run_weather() -> None:
     print("\nWeather Forecast — Belief Revision Engine")

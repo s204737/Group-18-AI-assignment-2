@@ -1,7 +1,6 @@
 """
-revision.py
------------
-Belief revision via the Levi Identity:
+
+Implementation of Belief revision via the Levi Identity:
 
     B * phi  =  (B ÷ ¬phi) + phi
 
@@ -41,9 +40,8 @@ def revise(base: BeliefBase, phi: Formula, priority: int = 5) -> BeliefBase:
     return revised
 
 
-# ---------------------------------------------------------------------------
-# Quick demo
-# ---------------------------------------------------------------------------
+
+# -----------------Quick demo--------------------------------------
 
 if __name__ == "__main__":
     from formula import Atom, Implies, Not, And
