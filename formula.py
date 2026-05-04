@@ -1,8 +1,9 @@
 """
-formula.py
-----------
-Propositional logic formula representation and CNF conversion
-for the belief revision engine.
+
+Propositional logic model for CNF conversion
+for the belief revision engine. This acts as the "data model layer". 
+It represents & evaluates formulas, converts them to CNF and feeds them into 
+the resolution based entailment. 
 
 Supported connectives:
   Atom(name)          -- atomic proposition, e.g. Atom('p')
@@ -18,12 +19,12 @@ from dataclasses import dataclass, field
 from typing import FrozenSet, Set
 
 
-# ---------------------------------------------------------------------------
-# Base class
-# ---------------------------------------------------------------------------
+
+# ---------------Base class------------------------
+
 
 class Formula:
-    """Abstract base for all propositional formulas."""
+    #Abstract base for all propositional formulas
 
     def __neg__(self) -> "Not":
         return Not(self)
@@ -35,19 +36,19 @@ class Formula:
         return Or(self, other)
 
     def __rshift__(self, other: "Formula") -> "Implies":
-        """Use >> as implication: p >> q  means  p → q"""
+        #Use >> as implication: p >> q  means  p → q
         return Implies(self, other)
 
     def atoms(self) -> Set[str]:
-        """Return the set of all atom names in this formula."""
+        #Return the set of all atom names in this formula
         raise NotImplementedError
 
     def evaluate(self, assignment: dict[str, bool]) -> bool:
-        """Evaluate the formula under a truth assignment."""
+        #Evaluate the formula under a truth assignment
         raise NotImplementedError
 
     def to_cnf(self) -> "Formula":
-        """Return an equivalent formula in Conjunctive Normal Form."""
+        #Return an equivalent formula in Conjunctive Normal Form
         f = self._eliminate_iff()
         f = f._eliminate_implies()
         f = f._push_negation_inward()
@@ -69,28 +70,26 @@ class Formula:
         raise NotImplementedError
 
     def is_literal(self) -> bool:
-        """True if this is an Atom or a Not(Atom)."""
+        #True if this is an Atom or a Not(Atom)
         return False
 
     def is_tautology(self) -> bool:
-        """Check whether the formula is a tautology (true in all worlds)."""
+        #Check whether the formula is a tautology (true in all worlds)
         for assignment in _all_assignments(self.atoms()):
             if not self.evaluate(assignment):
                 return False
         return True
 
     def is_contradiction(self) -> bool:
-        """Check whether the formula is unsatisfiable."""
+        #Check whether the formula is unsatisfiable
         for assignment in _all_assignments(self.atoms()):
             if self.evaluate(assignment):
                 return False
         return True
 
     def to_clauses(self) -> list[FrozenSet["Formula"]]:
-        """
-        Convert to CNF and return a list of clauses.
-        Each clause is a frozenset of literals (Atom or Not(Atom)).
-        """
+        #Convert to CNF and return a list of clauses
+        #Each clause is a frozenset of literals (Atom or Not(Atom))
         cnf = self.to_cnf()
         return _extract_clauses(cnf)
 
@@ -104,9 +103,7 @@ class Formula:
         raise NotImplementedError
 
 
-# ---------------------------------------------------------------------------
-# Concrete formula types
-# ---------------------------------------------------------------------------
+# ---------------Concrete formula types-------------------------
 
 @dataclass(frozen=True)
 class Atom(Formula):
@@ -223,7 +220,7 @@ class Or(Formula):
                   self.right._push_negation_inward())
 
     def _distribute_or_over_and(self):
-        """Key step: (A ∨ (B ∧ C))  →  (A ∨ B) ∧ (A ∨ C)"""
+        #Key step: (A ∨ (B ∧ C))  →  (A ∨ B) ∧ (A ∨ C)
         l = self.left._distribute_or_over_and()
         r = self.right._distribute_or_over_and()
 
@@ -300,12 +297,11 @@ class Iff(Formula):
         return f"({self.left!r} ↔ {self.right!r})"
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+# -----------Helper Functions for CNF conversion and clause extraction----------------------
+
 
 def _all_assignments(atom_names: Set[str]):
-    """Generate all truth assignments over the given atoms."""
+    #Generate all truth assignments over the given atoms
     names = sorted(atom_names)
     n = len(names)
     for i in range(2 ** n):
@@ -313,10 +309,8 @@ def _all_assignments(atom_names: Set[str]):
 
 
 def _extract_clauses(cnf: Formula) -> list[FrozenSet[Formula]]:
-    """
-    Walk a CNF formula and collect each clause as a frozenset of literals.
-    A CNF formula is an And of Ors of literals.
-    """
+    #Walk a CNF formula and collect each clause as a frozenset of literals
+    #A CNF formula is an And of Ors of literals
     clauses = []
     _collect_and(cnf, clauses)
     return clauses
@@ -337,9 +331,7 @@ def _collect_or(f: Formula) -> list[Formula]:
     return [f]
 
 
-# ---------------------------------------------------------------------------
-# Quick demo
-# ---------------------------------------------------------------------------
+# --------------Quick demo--------------------
 
 if __name__ == "__main__":
     p, q, r = Atom('p'), Atom('q'), Atom('r')

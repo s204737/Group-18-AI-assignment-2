@@ -1,6 +1,4 @@
 """
-belief_base.py
---------------
 Belief base: a prioritised set of propositional formulas.
 
 Each belief is stored as (formula, priority) where priority is an integer.
@@ -12,13 +10,12 @@ from formula import Formula, Not
 
 
 class BeliefBase:
-    """
-    A finite, prioritised belief base.
+    
+    #A finite, prioritised belief base ->
 
-    Internally stored as a list of (Formula, int) pairs.
-    Duplicate formulas are not allowed; adding an existing formula
-    updates its priority instead.
-    """
+    #Internally stored as a list of (Formula, int) pairs.
+    #Duplicate formulas are not allowed; adding an existing formula
+    #updates its priority instead
 
     def __init__(self, beliefs: list[tuple[Formula, int]] | None = None):
         # Store as list of (formula, priority)
@@ -26,12 +23,11 @@ class BeliefBase:
         for formula, priority in (beliefs or []):
             self.add(formula, priority)
 
-    # ------------------------------------------------------------------
-    # Core interface
-    # ------------------------------------------------------------------
+
+    # -----------Main Features------------
 
     def add(self, formula: Formula, priority: int) -> None:
-        """Add a formula with the given priority. Updates priority if already present."""
+        #Add a formula with the given priority. Updates priority if already present
         for i, (f, _) in enumerate(self._beliefs):
             if f == formula:
                 self._beliefs[i] = (formula, priority)
@@ -39,14 +35,14 @@ class BeliefBase:
         self._beliefs.append((formula, priority))
 
     def remove(self, formula: Formula) -> None:
-        """Remove a formula (no-op if not present)."""
+        #Remove a formula (no-op if not present)
         self._beliefs = [(f, p) for f, p in self._beliefs if f != formula]
 
     def __contains__(self, formula: Formula) -> bool:
         return any(f == formula for f, _ in self._beliefs)
 
     def __iter__(self):
-        """Iterate over (formula, priority) pairs, highest priority first."""
+        #Iterate over (formula, priority) pairs, highest priority first
         return iter(sorted(self._beliefs, key=lambda x: -x[1]))
 
     def __len__(self) -> int:
@@ -57,7 +53,7 @@ class BeliefBase:
         return "BeliefBase(\n" + "\n".join(lines) + "\n)"
 
     def formulas(self) -> list[Formula]:
-        """Return all formulas, sorted by descending priority."""
+        #Return all formulas, sorted by descending priority
         return [f for f, _ in self]
 
     def priority_of(self, formula: Formula) -> int | None:
@@ -75,14 +71,12 @@ class BeliefBase:
     def to_set(self) -> set[Formula]:
         return set(self.formulas())
 
-    # ------------------------------------------------------------------
-    # Consistency
-    # ------------------------------------------------------------------
+    
+    # --------------Consistency---------------------
 
     def is_consistent(self) -> bool:
-        """
-        Return True if the belief base is satisfiable —
-        i.e. there exists at least one truth assignment satisfying all beliefs.
-        """
+        
+        #Return True if the belief base is satisfiable -->
+        #i.e. there exists at least one truth assignment satisfying all beliefs
         from entailment import is_consistent
         return is_consistent(self.formulas())

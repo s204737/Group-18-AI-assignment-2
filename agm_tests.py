@@ -1,6 +1,4 @@
 """
-agm_tests.py
-------------
 Tests for the five AGM revision postulates.
 
   1. Success          phi ∈ B * phi
@@ -19,9 +17,7 @@ from operations import expand
 from revision import revise
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+# ---------------Helper functions---------------------------
 
 def _formulas_equal_as_sets(b1: BeliefBase, b2: BeliefBase) -> bool:
     f1 = b1.formulas()
@@ -46,9 +42,7 @@ def _print_result(postulate: str, passed: bool) -> None:
     print(f"\n  [{status}] {postulate}\n")
 
 
-# ---------------------------------------------------------------------------
-# Postulate 1 — Success
-# ---------------------------------------------------------------------------
+# ---------------Postulate 1 — Success------------------
 
 def test_success() -> bool:
     print("\n" + "─" * 50)
@@ -75,9 +69,7 @@ def test_success() -> bool:
     return passed
 
 
-# ---------------------------------------------------------------------------
-# Postulate 2 — Inclusion
-# ---------------------------------------------------------------------------
+# ------------------Postulate 2 — Inclusion----------------------
 
 def test_inclusion() -> bool:
     print("\n" + "─" * 50)
@@ -113,9 +105,7 @@ def test_inclusion() -> bool:
     return passed
 
 
-# ---------------------------------------------------------------------------
-# Postulate 3 — Vacuity
-# ---------------------------------------------------------------------------
+# -------------Postulate 3 — Vacuity--------------------------
 
 def test_vacuity() -> bool:
     print("\n" + "─" * 50)
@@ -148,9 +138,8 @@ def test_vacuity() -> bool:
     return passed
 
 
-# ---------------------------------------------------------------------------
-# Postulate 4 — Consistency
-# ---------------------------------------------------------------------------
+
+# -------------------Postulate 4 — Consistency---------------------
 
 def test_consistency() -> bool:
     print("\n" + "─" * 50)
@@ -179,9 +168,7 @@ def test_consistency() -> bool:
     return passed
 
 
-# ---------------------------------------------------------------------------
-# Postulate 5 — Extensionality
-# ---------------------------------------------------------------------------
+# ----------------Postulate 5 — Extensionality----------------------
 
 def test_extensionality() -> bool:
     print("\n" + "─" * 50)
@@ -214,9 +201,7 @@ def test_extensionality() -> bool:
     return passed
 
 
-# ---------------------------------------------------------------------------
-# Run all tests
-# ---------------------------------------------------------------------------
+# --------------------Run all tests function --------------------
 
 def run_all_tests() -> None:
     print("\n" + "=" * 50)

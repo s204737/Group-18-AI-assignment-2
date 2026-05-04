@@ -1,6 +1,4 @@
 """
-entailment.py
--------------
 Resolution-based logical entailment for propositional logic.
 
 To check whether KB |= phi:
@@ -21,41 +19,34 @@ from typing import FrozenSet
 Clause = FrozenSet[Formula]
 
 
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
+
+# ----------Public API------------------------
 
 def entails(kb: list[Formula], phi: Formula) -> bool:
-    """
-    Return True if kb logically entails phi (kb |= phi).
-    Uses resolution refutation: tries to derive a contradiction from kb + {¬phi}.
-    """
+    #Return True if kb logically entails phi (kb |= phi)
+    #Uses resolution refutation: tries to derive a contradiction from kb + {¬phi}
     formulas = list(kb) + [Not(phi)]
     clauses = _to_clause_set(formulas)
     return _resolution(clauses)
 
 
 def is_consistent(formulas: list[Formula]) -> bool:
-    """
-    Return True if the set of formulas is satisfiable
-    (i.e. does NOT entail a contradiction).
-    """
+    #Return True if the set of formulas is satisfiable
+    #(i.e. does NOT entail a contradiction)
     clauses = _to_clause_set(formulas)
     # If resolution on the formulas alone derives the empty clause => inconsistent
     return not _resolution(clauses)
 
 
 def entails_negation(kb: list[Formula], phi: Formula) -> bool:
-    """Convenience: check whether kb |= ¬phi."""
+    #Convenience: check whether kb |= ¬phi
     return entails(kb, Not(phi))
 
 
-# ---------------------------------------------------------------------------
-# Resolution engine
-# ---------------------------------------------------------------------------
+# ---------------Resolution engine-----------------------
 
 def _to_clause_set(formulas: list[Formula]) -> set[Clause]:
-    """Convert a list of formulas to a set of CNF clauses."""
+    #Convert a list of formulas to a set of CNF clauses.
     clauses: set[Clause] = set()
     for f in formulas:
         for clause in f.to_clauses():
@@ -93,11 +84,10 @@ def _negate_literal(literal: Formula) -> Formula:
 
 
 def _resolution(clauses: set[Clause]) -> bool:
-    """
-    Run the resolution algorithm.
-    Returns True if the empty clause is derived (i.e. refutation found).
-    Returns False if saturation is reached without finding the empty clause.
-    """
+    
+    #Run the resolution algorithm.
+    #Returns True if the empty clause is derived (i.e. refutation found).
+    #Returns False if saturation is reached without finding the empty clause.
     clauses = set(clauses)   # work on a copy
 
     while True:
@@ -118,9 +108,7 @@ def _resolution(clauses: set[Clause]) -> bool:
         clauses |= new_clauses
 
 
-# ---------------------------------------------------------------------------
-# Quick demo
-# ---------------------------------------------------------------------------
+# ----------Test/DEMO-----------------------
 
 if __name__ == "__main__":
     from formula import Atom, Implies, Not, And, Or
